@@ -8,22 +8,21 @@ Storymatic.py est un script python qui genere des pdf. Il est propre au projet D
 Ce script a besoin de Pillow
 
     pip install Pillow 
-ou 
 
-    pip3 install Pillow
 
 et de REPORTLAB
 
     pip install reportlab
 
-ou
+On peut utiliser le script via un shell :
 
-    pip3 install reportlab
+    python storymatic.py S01.txt
 
+On en faisant un processus automatique pour drag and drop (voir AUTOMATOR)
 
 # UTILISATION
 
-Ce script prend en entree un fichier texte qui liste des images qui se trouvent
+Ce script prend en entree un fichier texte qui liste des vignettes qui se trouvent
 dans le meme dossier. Il sortira un fichier pdf, a coté du fichier texte, et du
 meme nom que le fichier texte.
 
@@ -75,12 +74,12 @@ a afficher :
 
 Par exemple, pour une ligne de dialogue de la vignette S01_P10 on aurait :
 
-    S01-P10/
+    S01-P10
     dialogue:une ligne de dialogue du P10
 
 Pour avoir plusieurs lignes, on met autant de dialogue: que necessaire, par exemple :
 
-    S01-P10/
+    S01-P10
     dialogue:la premiere ligne de dialogue
     dialogue:la seconde ligne de dialogue
     dialogue:et une 3eme ligne si besoin
@@ -92,7 +91,7 @@ La declaration d'une action fonctionne comme pour les dialogues, avec "action:"
 
 Exemple sur 1 ligne :
 
-    S01-P10/
+    S01-P10
     action:Une ligne d'action
 
 Et un exemple pour plusieures lignes :
@@ -129,4 +128,4 @@ Et y copier (pour python3) :
         /Library/Frameworks/Python.framework/Versions/3.4/bin/python3 /chemin/vers/storymatic.py "$f"
     done
 
-en mettant a jour le chemin vers storymatic.py bien entendu
+en mettant a jour le chemin vers storymatic.py bien entendu (et la bonne version de python le cas échéant)

@@ -110,9 +110,9 @@ for t in thumbnails:
         img = name.split(':')[0].replace('/', '')
 
         if not ":" in name and "-" in name:
-            texte = name.split("-")[1]
+            texte = name.split("-")[1].replace('/', '')
         else:
-            texte = name.split(':')[-1].replace('/', '')
+            texte = name.split(':')[-1]
         print(page, line, position, img)
         imgPath = folder + img + '.jpg'
         if not os.path.exists(imgPath):
@@ -122,19 +122,19 @@ for t in thumbnails:
             c.setFont("Helvetica-Bold", fontSize)
             c.drawString((positions[position]+2)*mm, height-(lines[line]-62)*mm, "%s" % texte)
             c.setFont("Helvetica", fontSize)
-        if dialogue:
-            dialogue.reverse()
-            print("DIALOGUE: ", dialogue)
-            dialogueLine = 0
-            for d in dialogue:
-                c.drawCentredString((positions[position]+47.5)*mm, height-(lines[line]-56-dialogueLine*5)*mm, "%s" % d)
-                dialogueLine += 1
-        if action:
-            print("ACTION: ", action)
-            actionLine = 0
-            for a in action:
-                c.drawCentredString((positions[position]+47.5)*mm, height-(lines[line]+8+actionLine*5)*mm, "%s" % a)
-                actionLine += 1
+    if dialogue:
+        dialogue.reverse()
+        print("DIALOGUE: ", dialogue)
+        dialogueLine = 0
+        for d in dialogue:
+            c.drawCentredString((positions[position]+47.5)*mm, height-(lines[line]-56-dialogueLine*5)*mm, "%s" % d)
+            dialogueLine += 1
+    if action:
+        print("ACTION: ", action)
+        actionLine = 0
+        for a in action:
+            c.drawCentredString((positions[position]+47.5)*mm, height-(lines[line]+8+actionLine*5)*mm, "%s" % a)
+            actionLine += 1
     if "/" in name:
         # Marquage noir
         c.rect((positions[position]+imgWidth)*mm, (height-(lines[line]+5)*mm), 0.8*mm, (imgHeigth+10)*mm, stroke=1, fill=1)
