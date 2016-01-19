@@ -23,7 +23,7 @@ Image.MAX_IMAGE_PIXELS = 1000000000
 
 gridPath = "/u/storymatic/grille.jpg"
 
-folder = os.path.dirname(sys.argv[1]) + "/"
+folder = os.path.dirname(sys.argv[1]) + "/"  # Pas clean...
 summary = sys.argv[1]
 
 if not summary.endswith(".txt"):
@@ -52,9 +52,13 @@ for l in f.readlines():
             for i in range(0,r):
                 thumbnails.append({'name': '-', 'dialogue': [], 'action': []})
         elif l.startswith('dialogue:'):
-            thumbnails[-1]['dialogue'].append(":".join(l.split(":")[1:]))
+            action = ":".join(l.split(":")[1:])
+            if action:
+                thumbnails[-1]['dialogue'].append(action)
         elif l.startswith('action:'):
-            thumbnails[-1]['action'].append(":".join(l.split(":")[1:]))
+            dialogue = ":".join(l.split(":")[1:])
+            if dialogue:
+                thumbnails[-1]['action'].append(dialogue)
         else:
             thumbnails.append({'name': l, 'dialogue': [], 'action': []})
 
