@@ -1,16 +1,16 @@
 
 import os
+
+import sys
+sys.path.append("/u/libs")  # Macs sans xcode -> JE SAIS !
+
 from PIL import Image
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A3
 from reportlab.lib.units import mm
 from datetime import datetime
 
-import sys
-
-
-
-# Coordonnes des lignes et positions en bas a gauche en mm
+#  Coordonnes des lignes et positions en bas a gauche en mm
 lines = [82.8, 171.5, 261.9]
 positions = [20.9, 116.9, 213.0, 309.0]
 # Taille des images en mm
@@ -22,8 +22,6 @@ height = A3[0]
 Image.MAX_IMAGE_PIXELS = 1000000000
 
 gridPath = "/u/storymatic/grille.jpg"
-
-
 
 folder = os.path.dirname(sys.argv[1]) + "/"
 summary = sys.argv[1]
@@ -119,9 +117,9 @@ for t in thumbnails:
             c.drawString((positions[position]+10)*mm, height-(lines[line]-imgHeigth/2)*mm, "Fichier introuvable : %s.jpg" % img)
         else:
             c.drawImage(imgPath, positions[position]*mm, height-lines[line]*mm, width=imgWidth*mm, height=imgHeigth*mm)
-            c.setFont("Helvetica-Bold", fontSize)
-            c.drawString((positions[position]+2)*mm, height-(lines[line]-62)*mm, "%s" % texte)
-            c.setFont("Helvetica", fontSize)
+        c.setFont("Helvetica-Bold", fontSize)
+        c.drawString((positions[position]+2)*mm, height-(lines[line]-62)*mm, "%s" % texte)
+        c.setFont("Helvetica", fontSize)
     if dialogue:
         dialogue.reverse()
         print("DIALOGUE: ", dialogue)
