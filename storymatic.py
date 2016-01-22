@@ -13,6 +13,8 @@ from datetime import datetime
 #  Coordonnes des lignes et positions en bas a gauche en mm
 lines = [82.8, 171.5, 261.9]
 positions = [20.9, 116.9, 213.0, 309.0]
+blackLineDown = [16, 18, 25]
+blackLineUp = [80, 81, 89]
 # Taille des images en mm
 imgWidth = 94.85
 imgHeigth = 53.36
@@ -20,6 +22,20 @@ fontSize = 10
 width = A3[1]
 height = A3[0]
 Image.MAX_IMAGE_PIXELS = 1000000000
+
+
+metas_alias = {'action': 'action', 'a': 'action',
+               'dialogue': 'dialogue', 'd': 'dialogue',
+               'orientation': 'orientation', 'o': 'orientation',
+               'echelle': 'echelle', 'e': 'echelle',
+               }
+
+metas = {'action': {'text-align': 'center', 'position': (47.5, 8), 'multiple-lines': True, 'ecart': 5, 'lines-up': False},
+         'dialogue': {'text-align': 'center', 'position': (47.5, -56), 'multiple-lines': True, 'ecart': 5, 'lines-up': True},
+         'orientation': {'text-align': 'left', 'position': (2, 8), 'multiple-lines': False, 'ecart': 0, 'lines-up': False},
+         'echelle': {'text-align': 'right', 'position': (93, 8), 'multiple-lines': False, 'ecart': 0, 'lines-up': False},
+
+         }
 
 gridPath = "/u/storymatic/grille.jpg"
 
@@ -32,9 +48,15 @@ if not summary.endswith(".txt"):
 outputPdf = summary.replace(".txt", ".pdf")
 
 
-
 thumbnails = []
 title = None
+
+
+def newThumbnail():
+    d = {'name': '-', 'cut': False}
+    for m in metas:
+        d[m] = [] if metas[m]['multiple-lines'] else None
+    return d
 
 # Reading script file
 f = open(summary, "r")
@@ -45,22 +67,40 @@ for l in f.readlines():
         title = l
         continue
     if l:
+        has_meta = False
+        meta = None
+        if ":" in l:
+            for m in metas_alias:
+                if l.lower().replace(" ", "").startswith("%s:" % m):
+                    has_meta = True
+                    meta = metas_alias[m]
         if l == "." or l == "SAUT DE PAGE":
             t = len(thumbnails)
             p = int(len(thumbnails)/12)
-            r = 12-abs(p*12 -t)
-            for i in range(0,r):
-                thumbnails.append({'name': '-', 'dialogue': [], 'action': []})
-        elif l.startswith('dialogue:'):
-            action = ":".join(l.split(":")[1:])
-            if action:
-                thumbnails[-1]['dialogue'].append(action)
-        elif l.startswith('action:'):
-            dialogue = ":".join(l.split(":")[1:])
-            if dialogue:
-                thumbnails[-1]['action'].append(dialogue)
+            r = 12-abs(p*12 - t)
+            for i in range(0, r):
+                thumbnails.append(newThumbnail())
+        # elif l.startswith('dialogue:'):
+        #     action = ":".join(l.split(":")[1:])
+        #     if action:
+        #         thumbnails[-1]['dialogue'].append(action)
+        # elif l.startswith('action:'):
+        #     dialogue = ":".join(l.split(":")[1:])
+        #     if dialogue:
+        #         thumbnails[-1]['action'].append(dialogue)
+        elif has_meta:
+            v = ":".join(l.split(":")[1:])
+            if metas[meta]['multiple-lines']:
+                thumbnails[-1][meta].append(v)
+            else:
+                thumbnails[-1][meta] = v
+        elif l.startswith('CUT'):
+            thumbnails[-1]['cut'] = True
         else:
-            thumbnails.append({'name': l, 'dialogue': [], 'action': []})
+            thumbnail = newThumbnail()
+            thumbnail['name'] = l
+            thumbnail['cut'] =  True if "/" in l else False
+            thumbnails.append(thumbnail)
 
 
 
@@ -91,8 +131,9 @@ newPage(c, 1, pages)
 
 for t in thumbnails:
     name = t['name']
-    dialogue = t['dialogue']
-    action = t['action']
+    #dialogue = t['dialogue']
+    #action = t['action']
+    cut = t['cut']
     # Calcul des positions/lignes et pages
     if line == 2 and position == 4:
         # Fin de la 4e position de la 3e ligne : nouvelle page
@@ -124,22 +165,45 @@ for t in thumbnails:
         c.setFont("Helvetica-Bold", fontSize)
         c.drawString((positions[position]+2)*mm, height-(lines[line]-62)*mm, "%s" % texte)
         c.setFont("Helvetica", fontSize)
-    if dialogue:
-        dialogue.reverse()
-        print("DIALOGUE: ", dialogue)
-        dialogueLine = 0
-        for d in dialogue:
-            c.drawCentredString((positions[position]+47.5)*mm, height-(lines[line]-56-dialogueLine*5)*mm, "%s" % d)
-            dialogueLine += 1
-    if action:
-        print("ACTION: ", action)
-        actionLine = 0
-        for a in action:
-            c.drawCentredString((positions[position]+47.5)*mm, height-(lines[line]+8+actionLine*5)*mm, "%s" % a)
-            actionLine += 1
-    if "/" in name:
+    # if dialogue:
+    #     dialogue.reverse()
+    #     print("DIALOGUE: ", dialogue)
+    #     dialogueLine = 0
+    #     for d in dialogue:
+    #         c.drawCentredString((positions[position]+47.5)*mm, height-(lines[line]-56-dialogueLine*5)*mm, "%s" % d)
+    #         dialogueLine += 1
+    # if action:
+    #     print("ACTION: ", action)
+    #     actionLine = 0
+    #     for a in action:
+    #         c.drawCentredString((positions[position]+47.5)*mm, height-(lines[line]+8+actionLine*5)*mm, "%s" % a)
+    #         actionLine += 1
+    for meta in metas:
+        if t[meta]:
+            l = 0
+            if metas[meta]['lines-up']:
+                t[meta].reverse()
+            for i in range(0, 1 if not metas[meta]["multiple-lines"] else len(t[meta])):
+                positionX = (positions[position]+metas[meta]['position'][0])*mm
+                ecart = l*metas[meta]['ecart']
+                if metas[meta]['lines-up']:
+                    ecart = 0-ecart
+                positionY = height-(lines[line]+metas[meta]['position'][1]+ecart)*mm
+
+                value = t[meta][l] if metas[meta]["multiple-lines"] else t[meta]
+                if metas[meta]['text-align'] == "right":
+                    c.drawRightString(positionX, positionY, "%s" % value)
+                elif metas[meta]['text-align'] == "center":
+                    c.drawCentredString(positionX, positionY, "%s" % value)
+                else:
+                    c.drawString(positionX, positionY, "%s" % value)
+
+                l += 1
+
+    if cut:  # "/" in name:
         # Marquage noir
-        c.rect((positions[position]+imgWidth)*mm, (height-(lines[line]+5)*mm), 0.8*mm, (imgHeigth+10)*mm, stroke=1, fill=1)
+        c.rect((positions[position]+imgWidth)*mm, (height-(lines[line]+blackLineDown[line])*mm), 0.8*mm, blackLineUp[line]*mm, stroke=1, fill=1)
+        #c.rect((positions[position]+imgWidth)*mm, (height-(lines[line]+16)*mm), 0.8*mm, (imgHeigth+10)*mm, stroke=1, fill=1)
 
     position += 1
 
