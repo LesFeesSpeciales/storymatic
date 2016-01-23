@@ -25,14 +25,15 @@ Image.MAX_IMAGE_PIXELS = 1000000000
 
 
 metas_alias = {'action': 'action', 'a': 'action',
-               'dialogue': 'dialogue', 'd': 'dialogue',
+               'dialogue': 'dialogue',
+               'd': 'orientation',
                'orientation': 'orientation', 'o': 'orientation',
                'echelle': 'echelle', 'e': 'echelle',
                }
 
 metas = {'action': {'text-align': 'center', 'position': (47.5, 8), 'multiple-lines': True, 'ecart': 5, 'lines-up': False},
          'dialogue': {'text-align': 'center', 'position': (47.5, -56), 'multiple-lines': True, 'ecart': 5, 'lines-up': True},
-         'orientation': {'text-align': 'left', 'position': (2, 8), 'multiple-lines': False, 'ecart': 0, 'lines-up': False},
+         'orientation': {'text-align': 'left', 'position': (2, 8), 'multiple-lines': True, 'ecart': 5, 'lines-up': False},
          'echelle': {'text-align': 'right', 'position': (93, 8), 'multiple-lines': False, 'ecart': 0, 'lines-up': False},
 
          }
