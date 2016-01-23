@@ -84,6 +84,13 @@ Pour avoir plusieurs lignes, on met autant de dialogue: que necessaire, par exem
     dialogue:la seconde ligne de dialogue
     dialogue:et une 3eme ligne si besoin
 
+
+Raccourci possible : d
+
+    S01-P10
+    dialogue:Un dialogue habituel
+    d:Ceci est aussi un dialogue, mais mot cle raccourci
+
 ## Les actions
 
 Les actions s'affichent centrées sous la vignette concernée.
@@ -100,6 +107,27 @@ Et un exemple pour plusieures lignes :
     action:Premiere ligne d'action
     action:Seconde ligne d'action
 
+Raccourci possible : a
+
+## Autres metadonnees
+
+### orientation
+
+Sera placé en bas a gauche de la case
+
+    S01-P10
+    orientation:Sud
+
+Raccourci possible : o
+
+### echelle
+
+Sera placé en bas a droite de la case
+
+    S01-P10
+    echelle:105%
+
+Raccourci possible : e
 
 ## Combiner
 
@@ -110,6 +138,24 @@ on peut maintenant tout combiner :
     dialogue:Une premiere ligne de dialogue
     dialogue:Une autre ligne de dialogue
 
+## PLeine page
+
+Dans des cas de planches complexes on peut avoir utilisé la grille habituelle
+pour créer une pleine page que l'on veut intégrer dans le story board.
+Pour éviter des manipulations de pdf a postériori et des numéros de pages 
+décallés, on peut créer la planche spéciale et la mettre avec les autres images.
+En utilisant la balise "page:" devant le nom de l'image, le script utilisera
+cette image en pleine page, dans une nouvelle planche.
+
+Exemple : 
+
+    S01-P10/:Plan 10
+    action:Une ligne d'action
+
+    page:S01-P11
+
+On aura une page avec une simple vignette S01-P10
+puis dans une autre page, l'image S01-P11 en pleine page
 
 # Fabriquer un AUTOMATOR (Pour mac)
 
