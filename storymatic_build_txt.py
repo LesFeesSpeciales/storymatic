@@ -40,9 +40,7 @@ for i in images:
         output += "\n\n%s/" % (i[0])
     output += "\ndialogue:\naction:\norientation:\nechelle:"
 
-print(output)
 
-exit()
 
 f = open(folder + "prepa.txt", 'w')
 f.write(output)
