@@ -53,7 +53,7 @@ title = None
 
 
 def newThumbnail():
-    d = {'name': '-', 'cut': False}
+    d = {'name': '-', 'cut': False, 'fullpage': False}
     for m in metas:
         d[m] = [] if metas[m]['multiple-lines'] else None
     return d
@@ -76,7 +76,7 @@ for l in f.readlines():
                     meta = metas_alias[m]
         if l == "." or l == "SAUT DE PAGE":
             t = len(thumbnails)
-            p = int(len(thumbnails)/12)
+            p = int(t/12)
             r = 12-abs(p*12 - t)
             for i in range(0, r):
                 thumbnails.append(newThumbnail())
@@ -88,13 +88,28 @@ for l in f.readlines():
         #     dialogue = ":".join(l.split(":")[1:])
         #     if dialogue:
         #         thumbnails[-1]['action'].append(dialogue)
+        elif l.startswith("page:"):
+            # pleine page speciale
+            # Boucler la page precedente s'il y a
+            t = len(thumbnails)
+            p = int(t/12)
+            r = 12-abs(p*12 - t)
+            if r != 12:
+                for i in range(0, r):
+                    thumbnails.append(newThumbnail())
+            # Remplir la page actuelle
+            for i in range(0, 12):
+                thumbnails.append(newThumbnail())
+            # indiquer sur la derniere case le caractere special
+            thumbnails[-1]['name'] = l.split(":")[1]
+            thumbnails[-1]['fullpage'] = True
         elif has_meta:
             v = ":".join(l.split(":")[1:])
             if metas[meta]['multiple-lines']:
                 thumbnails[-1][meta].append(v)
             else:
                 thumbnails[-1][meta] = v
-        elif l.startswith('CUT'):
+        elif l.lower() == "cut":
             thumbnails[-1]['cut'] = True
         else:
             thumbnail = newThumbnail()
@@ -109,10 +124,11 @@ grid = Image.open(gridPath)
 c = canvas.Canvas(outputPdf, pagesize=(width, height))
 
 
-def newPage(c, pageNumber, pages):
-    if pageNumber>1:
-        c.showPage()
-    c.drawInlineImage(grid, 0, 0, width=width, height=height)
+def newPage(c, pageNumber, pages, justtext=False):
+    if not justtext:
+        if pageNumber>1:
+            c.showPage()
+        c.drawInlineImage(grid, 0, 0, width=width, height=height)
     c.drawString(70*mm, height-10*mm, title)
     c.drawRightString(width-15*mm, height-10*mm, "Page %i/%i" % (pageNumber, pages))
     c.drawRightString(width-15*mm, 3*mm, "%02i/%02i/%i  %02i:%02i" % (today.day, today.month, today.year, today.hour, today.minute))
@@ -160,11 +176,16 @@ for t in thumbnails:
         imgPath = folder + img + '.jpg'
         if not os.path.exists(imgPath):
             c.drawString((positions[position]+10)*mm, height-(lines[line]-imgHeigth/2)*mm, "Fichier introuvable : %s.jpg" % img)
+        elif t['fullpage']:
+            c.drawInlineImage(imgPath, 0, 0, width=width, height=height)
+            newPage(c, page, pages, justtext=True)
         else:
             c.drawImage(imgPath, positions[position]*mm, height-lines[line]*mm, width=imgWidth*mm, height=imgHeigth*mm)
-        c.setFont("Helvetica-Bold", fontSize)
-        c.drawString((positions[position]+2)*mm, height-(lines[line]-62)*mm, "%s" % texte)
-        c.setFont("Helvetica", fontSize)
+        
+        if not t['fullpage']:
+            c.setFont("Helvetica-Bold", fontSize)
+            c.drawString((positions[position]+2)*mm, height-(lines[line]-62)*mm, "%s" % texte)
+            c.setFont("Helvetica", fontSize)
     # if dialogue:
     #     dialogue.reverse()
     #     print("DIALOGUE: ", dialogue)
