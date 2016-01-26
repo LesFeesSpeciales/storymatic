@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# coding: utf-8
+
 import os
 import glob
 import sys
@@ -26,7 +29,7 @@ for i in listImages:
         print("Image mal nommee ? %s" % img)
     
 
-output = "SEQUENCE"
+output = u"SEQUENCE"
 
 for i in images:
     if len(shots[i[1]]) > 1:  # si shot multiplce vignettes
@@ -39,8 +42,6 @@ for i in images:
     else:
         output += "\n\n%s/" % (i[0])
     output += "\ndialogue:\naction:\norientation:\nechelle:"
-
-
 
 f = open(folder + "prepa.txt", 'w')
 f.write(output)
