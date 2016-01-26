@@ -20,11 +20,21 @@ blackLineUp = [80, 81, 89]
 # Taille des images en mm
 imgWidth = 94.85
 imgHeigth = 53.36
+Image.MAX_IMAGE_PIXELS = 1000000000
+# Default fonts
 fontSize = 10
+defaultFont = "Helvetica"
+# Autres
 width = A3[1]
 height = A3[0]
-Image.MAX_IMAGE_PIXELS = 1000000000
 
+
+
+texts = {'titre': {'position': (width/2, height-10*mm), 'font-size': 16, 'font': defaultFont},
+         'pagination': {'position': (width-15*mm, height-10*mm), 'font-size': 10, 'font': defaultFont},
+         'date': {'position': (width-66*mm, 9.6*mm), 'font-size': 9, 'font': defaultFont},
+         'shot-name': {'position': (width-15*mm, 3*mm), 'font-size': fontSize, 'font': "Helvetica-Bold"}
+         }
 
 metas_alias = {'action': 'action', 'a': 'action',
                'dialogue': 'dialogue',
@@ -33,10 +43,10 @@ metas_alias = {'action': 'action', 'a': 'action',
                'echelle': 'echelle', 'e': 'echelle',
                }
 
-metas = {'action': {'text-align': 'center', 'position': (47.5, 8), 'multiple-lines': True, 'ecart': 5, 'lines-up': False},
-         'dialogue': {'text-align': 'center', 'position': (47.5, -56), 'multiple-lines': True, 'ecart': 5, 'lines-up': True},
-         'orientation': {'text-align': 'left', 'position': (2, 8), 'multiple-lines': True, 'ecart': 5, 'lines-up': False},
-         'echelle': {'text-align': 'right', 'position': (93, 8), 'multiple-lines': False, 'ecart': 0, 'lines-up': False},
+metas = {'action': {'text-align': 'center', 'position': (47.5, 8), 'multiple-lines': True, 'ecart': 5, 'lines-up': False, 'font-size':fontSize, 'font': defaultFont},
+         'dialogue': {'text-align': 'center', 'position': (47.5, -56), 'multiple-lines': True, 'ecart': 5, 'lines-up': True, 'font-size':fontSize, 'font': defaultFont},
+         'orientation': {'text-align': 'left', 'position': (2, 8), 'multiple-lines': True, 'ecart': 5, 'lines-up': False, 'font-size':8, 'font': defaultFont},
+         'echelle': {'text-align': 'right', 'position': (93, 8), 'multiple-lines': False, 'ecart': 0, 'lines-up': False, 'font-size':8, 'font': defaultFont},
 
          }
 
@@ -83,15 +93,8 @@ for l in f.readlines():
             r = 12-abs(p*12 - t)
             for i in range(0, r):
                 thumbnails.append(newThumbnail())
-        # elif l.startswith('dialogue:'):
-        #     action = ":".join(l.split(":")[1:])
-        #     if action:
-        #         thumbnails[-1]['dialogue'].append(action)
-        # elif l.startswith('action:'):
-        #     dialogue = ":".join(l.split(":")[1:])
-        #     if dialogue:
-        #         thumbnails[-1]['action'].append(dialogue)
-        elif l.startswith("page:"):
+
+        elif l.lower().startswith("page:") or l.lower().startswith("fond:"):
             # pleine page speciale
             # Boucler la page precedente s'il y a
             t = len(thumbnails)
@@ -101,6 +104,7 @@ for l in f.readlines():
                 for i in range(0, r):
                     thumbnails.append(newThumbnail())
             # Remplir la page actuelle
+
             for i in range(0, 12):
                 thumbnails.append(newThumbnail())
             # indiquer sur la derniere case le caractere special
@@ -132,9 +136,14 @@ def newPage(c, pageNumber, pages, justtext=False):
         if pageNumber>1:
             c.showPage()
         c.drawInlineImage(grid, 0, 0, width=width, height=height)
-    c.drawString(70*mm, height-10*mm, title)
-    c.drawRightString(width-15*mm, height-10*mm, "Page %i/%i" % (pageNumber, pages))
-    c.drawRightString(width-15*mm, 3*mm, "%02i/%02i/%i  %02i:%02i" % (today.day, today.month, today.year, today.hour, today.minute))
+
+
+    c.setFont(texts['titre']['font'], texts['titre']['font-size'])
+    c.drawCentredString(texts['titre']['position'][0], texts['titre']['position'][1], title)
+    c.setFont(texts['pagination']['font'], texts['pagination']['font-size'])
+    c.drawRightString(texts['pagination']['position'][0], texts['pagination']['position'][1], "%i/%i" % (pageNumber, pages))
+    c.setFont(texts['date']['font'], texts['date']['font-size'])
+    c.drawRightString(texts['date']['position'][0], texts['date']['position'][1], "%02i/%02i/%i  %02i:%02i" % (today.day, today.month, today.year, today.hour, today.minute))
 
 
 pages = int(len(thumbnails)/12)+1
@@ -148,10 +157,8 @@ c.setFillColorRGB(0, 0, 0)
 newPage(c, 1, pages)
 
 
-for t in thumbnails:
+for k, t in enumerate(thumbnails):
     name = t['name']
-    #dialogue = t['dialogue']
-    #action = t['action']
     cut = t['cut']
     # Calcul des positions/lignes et pages
     if line == 2 and position == 4:
@@ -186,9 +193,9 @@ for t in thumbnails:
             c.drawImage(imgPath, positions[position]*mm, height-lines[line]*mm, width=imgWidth*mm, height=imgHeigth*mm)
         
         if not t['fullpage']:
-            c.setFont("Helvetica-Bold", fontSize)
+            c.setFont(texts['shot-name']['font'], texts['shot-name']['font-size'])
             c.drawString((positions[position]+2)*mm, height-(lines[line]-62)*mm, "%s" % texte)
-            c.setFont("Helvetica", fontSize)
+            c.setFont(defaultFont, fontSize)
     for meta in metas:
         if t[meta]:
             l = 0
@@ -202,6 +209,7 @@ for t in thumbnails:
                 positionY = height-(lines[line]+metas[meta]['position'][1]+ecart)*mm
 
                 value = t[meta][l] if metas[meta]["multiple-lines"] else t[meta]
+                c.setFont(metas[meta]['font'], metas[meta]['font-size'])
                 if metas[meta]['text-align'] == "right":
                     c.drawRightString(positionX, positionY, "%s" % value)
                 elif metas[meta]['text-align'] == "center":
@@ -214,7 +222,8 @@ for t in thumbnails:
     if cut:  # "/" in name:
         # Marquage noir
         c.rect((positions[position]+imgWidth)*mm, (height-(lines[line]+blackLineDown[line])*mm), 0.8*mm, blackLineUp[line]*mm, stroke=1, fill=1)
-
+    if position == 0 and k > 0 and thumbnails[k-1]['cut']:
+        c.rect((positions[position]-0.8)*mm, (height-(lines[line]+blackLineDown[line])*mm), 0.8*mm, blackLineUp[line]*mm, stroke=1, fill=1)
     position += 1
 
 # Sauvegarde du fichier
