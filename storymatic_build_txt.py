@@ -29,7 +29,24 @@ for i in listImages:
         print("Image mal nommee ? %s" % img)
     
 
-output = u"SEQUENCE"
+output = u"""S00 NOM DE LA SEQUENCE # Cette premiere ligne doit contenir le nom de la sequence
+
+########### RAPPELS ############
+# nom_du_jpg 
+# ou :
+# nom_du_jpg:texte de remplacement
+# nom_du_jpg/ # un plan avec un cut
+# et maintenant sous un plan on peut ajouter :
+# action: une action
+# dialogue: un dialogue
+# d: un decors (en bas a gauche)
+# o: une orientation
+# cut
+# fo # fondu d'ouverture
+# fe # fondu enchaine
+# ff # fondu fermeture
+# # un commentaire - pas pris en compte
+################################\n"""
 
 for i in images:
     if len(shots[i[1]]) > 1:  # si shot multiplce vignettes

@@ -31,8 +31,6 @@ height = A3[0]
 defaultLineWidth = 1
 defaultLineCap = None
 
-
-
 texts = {'titre': {'position': (width/2, height-10*mm), 'font-size': 16, 'font': defaultFont},
          'pagination': {'position': (width-15*mm, height-10*mm), 'font-size': 10, 'font': defaultFont},
          'rappel-sequence': {'position': (width-25*mm, height-10*mm), 'font-size': 11, 'font': defaultFont},
@@ -40,11 +38,12 @@ texts = {'titre': {'position': (width/2, height-10*mm), 'font-size': 16, 'font':
          'shot-name': {'position': (width-15*mm, 3*mm), 'font-size': fontSize, 'font': defaultFont}
          }
 
-symbols ={
+symbols = {
     'FE': {'offset': (imgWidth-4.5, -10), 'lines': [{'p': (0, 0, 9, 75), 'd': (30, 6)}]},
     'FO': {'offset': (-4.5, -10), 'lines': [{'p': (9, 0, 0, 75/2)}, {'p': (0, 75/2, 9, 75)}]},
     'FF': {'offset': (imgWidth-4.5, -10), 'lines': [{'p': (0, 0, 9, 75/2)}, {'p': (9, 75/2, 0, 75)}]},
 }
+
 metas_alias = {'action': 'action', 'a': 'action',
                'dialogue': 'dialogue',
                'd': 'orientation',
@@ -86,7 +85,7 @@ def newThumbnail():
 # Reading script file
 f = open(summary, "r")
 for l in f.readlines():
-    l = l.replace("\n", "").replace("\r", "")
+    l = l.replace("\n", "").replace("\r", "").split("#")[0]
     print(l)
     if not title:
         title = l
