@@ -60,7 +60,7 @@ metas = {'action': {'text-align': 'center', 'position': (47.5, 8), 'multiple-lin
 
 scriptPath = "/u/storymatic/"
 gridPath = scriptPath + "grille.jpg"
-fadePath = scriptPath + "fade.png"
+
 
 
 folder = os.path.dirname(sys.argv[1]) + "/"  # Pas clean...
@@ -147,7 +147,6 @@ for l in f.readlines():
 grid = Image.open(gridPath)
 c = canvas.Canvas(outputPdf, pagesize=(width, height))
 
-fade = Image.open(fadePath)
 
 def newPage(c, pageNumber, pages, justtext=False):
     if not justtext:
