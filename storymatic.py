@@ -39,9 +39,9 @@ texts = {'titre': {'position': (width/2, height-10*mm), 'font-size': 16, 'font':
          }
 
 symbols = {
-    'FE': {'offset': (imgWidth-4.5, -10), 'lines': [{'p': (0, 0, 9, 75), 'd': (30, 6)}]},
-    'FO': {'offset': (-4.5, -10), 'lines': [{'p': (9, 0, 0, 75/2)}, {'p': (0, 75/2, 9, 75)}]},
-    'FF': {'offset': (imgWidth-4.5, -10), 'lines': [{'p': (0, 0, 9, 75/2)}, {'p': (9, 75/2, 0, 75)}]},
+    'FE': {'offset': (imgWidth-4.5, -4), 'lines': [{'p': (0, 0, 9, imgHeigth+8), 'd': (30, 6)}]},
+    'FO': {'offset': (-4.5, -4), 'lines': [{'p': (9, 0, 0, (imgHeigth+8)/2)}, {'p': (0, (imgHeigth+8)/2, 9, imgHeigth+8)}]},
+    'FF': {'offset': (imgWidth-4.5, -4), 'lines': [{'p': (0, 0, 9, (imgHeigth+8)/2)}, {'p': (9, (imgHeigth+8)/2, 0, (imgHeigth+8))}]},
 }
 
 metas_alias = {'action': 'action', 'a': 'action',
@@ -147,8 +147,12 @@ for l in f.readlines():
 grid = Image.open(gridPath)
 c = canvas.Canvas(outputPdf, pagesize=(width, height))
 
-
+shapesQueue = []
 def newPage(c, pageNumber, pages, justtext=False):
+    global shapesQueue
+    if shapesQueue:
+        drawShapes(shapesQueue)
+        shapesQueue = []
     if not justtext:
         if pageNumber>1:
             c.showPage()
@@ -178,13 +182,24 @@ c.setFillColorRGB(0, 0, 0)
 
 newPage(c, 1, pages)
 
+
+
+def queueShape(initialPosition=(0, 0), offset=(0, 0), lines=[]):
+    shapesQueue.append((initialPosition, offset, lines))
+
+
+def drawShapes(shapesQueue):
+    for s in shapesQueue:
+        drawShape(s[0], s[1], s[2])
+
+
 def drawShape(initialPosition=(0, 0), offset=(0, 0), lines=[]):
     print("Drawshape : %s" % str(lines))
     i = initialPosition
     o = offset
     print(i)
     print(o)
-    
+
     for l in lines:
         p = l['p'] # Positions
         # Dashes
@@ -192,7 +207,7 @@ def drawShape(initialPosition=(0, 0), offset=(0, 0), lines=[]):
             c.setDash(l['d'][0], l['d'][1])
         else:
             c.setDash(1, 0)
-        
+
         c.line((i[0]+o[0]+p[0])*mm, (i[1]+o[1]+p[1])*mm, (i[0]+o[0]+p[2])*mm, (i[1]+o[1]+p[3])*mm)
 
     c.setDash(1, 0)
@@ -259,13 +274,13 @@ for k, t in enumerate(thumbnails):
                 l += 1
     if t['FO']:
         # Fondu d'ouverture
-        drawShape(initialPosition=(positions[position], height/mm-lines[line]), offset=symbols['FO']['offset'], lines=symbols['FO']['lines'])
+        queueShape(initialPosition=(positions[position], height/mm-lines[line]), offset=symbols['FO']['offset'], lines=symbols['FO']['lines'])
     if t['FE']:
         # Fondu enchaine
-        drawShape(initialPosition=(positions[position], height/mm-lines[line]), offset=symbols['FE']['offset'], lines=symbols['FE']['lines'])
+        queueShape(initialPosition=(positions[position], height/mm-lines[line]), offset=symbols['FE']['offset'], lines=symbols['FE']['lines'])
     if t['FF']:
         # Fondu de fermeture
-        drawShape(initialPosition=(positions[position], height/mm-lines[line]), offset=symbols['FF']['offset'], lines=symbols['FF']['lines'])
+        queueShape(initialPosition=(positions[position], height/mm-lines[line]), offset=symbols['FF']['offset'], lines=symbols['FF']['lines'])
 
     if cut:  # "/" in name:
         # Marquage noir
