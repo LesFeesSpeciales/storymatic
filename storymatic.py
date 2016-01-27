@@ -28,14 +28,23 @@ defaultFont = "Helvetica"
 width = A3[1]
 height = A3[0]
 
+defaultLineWidth = 1
+defaultLineCap = None
+
 
 
 texts = {'titre': {'position': (width/2, height-10*mm), 'font-size': 16, 'font': defaultFont},
          'pagination': {'position': (width-15*mm, height-10*mm), 'font-size': 10, 'font': defaultFont},
-         'date': {'position': (width-66*mm, 9.6*mm), 'font-size': 9, 'font': defaultFont},
-         'shot-name': {'position': (width-15*mm, 3*mm), 'font-size': fontSize, 'font': "Helvetica-Bold"}
+         'rappel-sequence': {'position': (width-25*mm, height-10*mm), 'font-size': 11, 'font': defaultFont},
+         'date': {'position': (width-66*mm, 9.65*mm), 'font-size': 9, 'font': defaultFont},
+         'shot-name': {'position': (width-15*mm, 3*mm), 'font-size': fontSize, 'font': defaultFont}
          }
 
+symbols ={
+    'FE': {'offset': (imgWidth-4.5, -10), 'lines': [{'p': (0, 0, 9, 75), 'd': (30, 6)}]},
+    'FO': {'offset': (-4.5, -10), 'lines': [{'p': (9, 0, 0, 75/2)}, {'p': (0, 75/2, 9, 75)}]},
+    'FF': {'offset': (imgWidth-4.5, -10), 'lines': [{'p': (0, 0, 9, 75/2)}, {'p': (9, 75/2, 0, 75)}]},
+}
 metas_alias = {'action': 'action', 'a': 'action',
                'dialogue': 'dialogue',
                'd': 'orientation',
@@ -50,7 +59,10 @@ metas = {'action': {'text-align': 'center', 'position': (47.5, 8), 'multiple-lin
 
          }
 
-gridPath = "/u/storymatic/grille.jpg"
+scriptPath = "/u/storymatic/"
+gridPath = scriptPath + "grille.jpg"
+fadePath = scriptPath + "fade.png"
+
 
 folder = os.path.dirname(sys.argv[1]) + "/"  # Pas clean...
 summary = sys.argv[1]
@@ -66,7 +78,7 @@ title = None
 
 
 def newThumbnail():
-    d = {'name': '-', 'cut': False, 'fullpage': False}
+    d = {'name': '-', 'cut': False, 'fullpage': False, 'FO': False, "FF": False, "FE": False}
     for m in metas:
         d[m] = [] if metas[m]['multiple-lines'] else None
     return d
@@ -118,6 +130,12 @@ for l in f.readlines():
                 thumbnails[-1][meta] = v
         elif l.lower() == "cut":
             thumbnails[-1]['cut'] = True
+        elif l.lower() == "fe":  # Fondu enchaine
+            thumbnails[-1]['FE'] = True
+        elif l.lower() == "fo":  # Fondu ouverture
+            thumbnails[-1]['FO'] = True
+        elif l.lower() == "ff":  # Fondu fermeture
+            thumbnails[-1]['FF'] = True
         else:
             thumbnail = newThumbnail()
             thumbnail['name'] = l
@@ -130,6 +148,7 @@ for l in f.readlines():
 grid = Image.open(gridPath)
 c = canvas.Canvas(outputPdf, pagesize=(width, height))
 
+fade = Image.open(fadePath)
 
 def newPage(c, pageNumber, pages, justtext=False):
     if not justtext:
@@ -140,8 +159,13 @@ def newPage(c, pageNumber, pages, justtext=False):
 
     c.setFont(texts['titre']['font'], texts['titre']['font-size'])
     c.drawCentredString(texts['titre']['position'][0], texts['titre']['position'][1], title)
+
     c.setFont(texts['pagination']['font'], texts['pagination']['font-size'])
     c.drawRightString(texts['pagination']['position'][0], texts['pagination']['position'][1], "%i/%i" % (pageNumber, pages))
+
+    c.setFont(texts['rappel-sequence']['font'], texts['rappel-sequence']['font-size'])
+    c.drawRightString(texts['rappel-sequence']['position'][0], texts['rappel-sequence']['position'][1], "%s" % (title.split(" ")[0]))
+
     c.setFont(texts['date']['font'], texts['date']['font-size'])
     c.drawRightString(texts['date']['position'][0], texts['date']['position'][1], "%02i/%02i/%i  %02i:%02i" % (today.day, today.month, today.year, today.hour, today.minute))
 
@@ -156,7 +180,24 @@ c.setFillColorRGB(0, 0, 0)
 
 newPage(c, 1, pages)
 
+def drawShape(initialPosition=(0, 0), offset=(0, 0), lines=[]):
+    print("Drawshape : %s" % str(lines))
+    i = initialPosition
+    o = offset
+    print(i)
+    print(o)
+    
+    for l in lines:
+        p = l['p'] # Positions
+        # Dashes
+        if 'd' in l:
+            c.setDash(l['d'][0], l['d'][1])
+        else:
+            c.setDash(1, 0)
+        
+        c.line((i[0]+o[0]+p[0])*mm, (i[1]+o[1]+p[1])*mm, (i[0]+o[0]+p[2])*mm, (i[1]+o[1]+p[3])*mm)
 
+    c.setDash(1, 0)
 for k, t in enumerate(thumbnails):
     name = t['name']
     cut = t['cut']
@@ -187,7 +228,7 @@ for k, t in enumerate(thumbnails):
         if not os.path.exists(imgPath):
             c.drawString((positions[position]+10)*mm, height-(lines[line]-imgHeigth/2)*mm, "Fichier introuvable : %s.jpg" % img)
         elif t['fullpage']:
-            c.drawInlineImage(imgPath, 0, 0, width=width, height=height)
+            c.drawImage(imgPath, 0, 0, width=width, height=height)
             newPage(c, page, pages, justtext=True)
         else:
             c.drawImage(imgPath, positions[position]*mm, height-lines[line]*mm, width=imgWidth*mm, height=imgHeigth*mm)
@@ -218,10 +259,20 @@ for k, t in enumerate(thumbnails):
                     c.drawString(positionX, positionY, "%s" % value)
 
                 l += 1
+    if t['FO']:
+        # Fondu d'ouverture
+        drawShape(initialPosition=(positions[position], height/mm-lines[line]), offset=symbols['FO']['offset'], lines=symbols['FO']['lines'])
+    if t['FE']:
+        # Fondu enchaine
+        drawShape(initialPosition=(positions[position], height/mm-lines[line]), offset=symbols['FE']['offset'], lines=symbols['FE']['lines'])
+    if t['FF']:
+        # Fondu de fermeture
+        drawShape(initialPosition=(positions[position], height/mm-lines[line]), offset=symbols['FF']['offset'], lines=symbols['FF']['lines'])
 
     if cut:  # "/" in name:
         # Marquage noir
         c.rect((positions[position]+imgWidth)*mm, (height-(lines[line]+blackLineDown[line])*mm), 0.8*mm, blackLineUp[line]*mm, stroke=1, fill=1)
+    # Marquage noir en entree si debut de ligne et vignette precedente en cut
     if position == 0 and k > 0 and thumbnails[k-1]['cut']:
         c.rect((positions[position]-0.8)*mm, (height-(lines[line]+blackLineDown[line])*mm), 0.8*mm, blackLineUp[line]*mm, stroke=1, fill=1)
     position += 1
