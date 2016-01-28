@@ -61,7 +61,7 @@ symbols = {
 }
 
 angle = 60
-samples = 40
+samples = 50
 maxPos = 11
 # Traits FF
 for j in range(1, samples+1):
