@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-
+import math
 import sys
 sys.path.append("/u/libs")  # Macs sans xcode -> JE SAIS !
 
@@ -43,6 +43,35 @@ symbols = {
     'FO': {'offset': (-4.5, -4), 'lines': [{'p': (9, 0, 0, (imgHeigth+8)/2)}, {'p': (0, (imgHeigth+8)/2, 9, imgHeigth+8)}]},
     'FF': {'offset': (imgWidth-4.5, -4), 'lines': [{'p': (0, 0, 9, (imgHeigth+8)/2)}, {'p': (9, (imgHeigth+8)/2, 0, (imgHeigth+8))}]},
 }
+
+angle = 60
+samples = 40
+maxPos = 11
+# Traits FF
+for j in range(1, samples+1):
+    k = (imgHeigth+8)/samples*j
+    
+    if k <= (imgHeigth+8)/2:
+        o = math.tan((9)/((imgHeigth+8)/2)) * k
+    else:
+        o = math.tan((9)/((imgHeigth+8)/2)) * ((imgHeigth+8)-k)
+    print(k, o)
+    o2 = math.tan(angle)*(maxPos-o)
+    #  symbols['FF']['lines'].append({'p': (0, (imgHeigth+8)-k, o, (imgHeigth+8)-k), 'd': (2, 1)})
+    symbols['FF']['lines'].append({'p': (o, (imgHeigth+8)-k, maxPos, (imgHeigth + 8)-k+o2), 'd': (1, 0), 'w': .3})
+
+# Traits FO
+for j in range(1, samples+1):
+    k = (imgHeigth+8)/samples*j
+    if k <= (imgHeigth+8)/2:
+        o = math.tan((-9)/((imgHeigth+8)/2)) * k
+    else:
+        o = math.tan((-9)/((imgHeigth+8)/2)) * ((imgHeigth+8)-k)
+    print(k, o)
+    o2 = math.tan(angle)*(maxPos+o)
+    #  symbols['FO']['lines'].append({'p': (o+9, (imgHeigth+8)-k, 9, (imgHeigth+8)-k), 'd': (1, 0), 'w':.3})
+    symbols['FO']['lines'].append({'p': (o+9, (imgHeigth+8)-k, -2, (imgHeigth + 8)-k+o2), 'd': (1, 0), 'w': .3})
+
 
 metas_alias = {'action': 'action', 'a': 'action',
                'dialogue': 'dialogue',
@@ -189,9 +218,11 @@ def queueShape(initialPosition=(0, 0), offset=(0, 0), lines=[]):
 
 
 def drawShapes(shapesQueue):
+    c.setLineCap(1)
     for s in shapesQueue:
         drawShape(s[0], s[1], s[2])
-
+    c.setLineCap(0)
+    c.setLineWidth(1)
 
 def drawShape(initialPosition=(0, 0), offset=(0, 0), lines=[]):
     print("Drawshape : %s" % str(lines))
@@ -202,6 +233,8 @@ def drawShape(initialPosition=(0, 0), offset=(0, 0), lines=[]):
 
     for l in lines:
         p = l['p'] # Positions
+        w = l['w'] if 'w' in l else 1
+        c.setLineWidth(w)
         # Dashes
         if 'd' in l:
             c.setDash(l['d'][0], l['d'][1])
@@ -289,6 +322,10 @@ for k, t in enumerate(thumbnails):
     if position == 0 and k > 0 and thumbnails[k-1]['cut']:
         c.rect((positions[position]-0.8)*mm, (height-(lines[line]+blackLineDown[line])*mm), 0.8*mm, blackLineUp[line]*mm, stroke=1, fill=1)
     position += 1
+
+    if k == len(thumbnails)-1:
+        # Derniere case, il faut dessiner les shaopes
+        drawShapes(shapesQueue)
 
 # Sauvegarde du fichier
 c.save()
