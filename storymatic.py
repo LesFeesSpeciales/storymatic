@@ -33,10 +33,26 @@ defaultLineCap = None
 
 texts = {'titre': {'position': (width/2, height-10*mm), 'font-size': 16, 'font': defaultFont},
          'pagination': {'position': (width-15*mm, height-10*mm), 'font-size': 10, 'font': defaultFont},
-         'rappel-sequence': {'position': (width-25*mm, height-10*mm), 'font-size': 11, 'font': defaultFont},
+         'rappel-sequence': {'position': (width-31*mm, height-10*mm), 'font-size': 11, 'font': defaultFont},
          'date': {'position': (width-66*mm, 9.65*mm), 'font-size': 9, 'font': defaultFont},
          'shot-name': {'position': (width-15*mm, 3*mm), 'font-size': fontSize, 'font': defaultFont}
          }
+
+
+metas_alias = {'action': 'action', 'a': 'action',
+               'dialogue': 'dialogue',
+               'd': 'orientation',
+               'orientation': 'orientation', 'o': 'orientation',
+               'echelle': 'echelle', 'e': 'echelle',
+               }
+
+metas = {'action': {'text-align': 'center', 'position': (47.5, 8), 'multiple-lines': True, 'ecart': 5, 'lines-up': False, 'font-size':fontSize, 'font': defaultFont},
+         'dialogue': {'text-align': 'center', 'position': (47.5, -56), 'multiple-lines': True, 'ecart': 5, 'lines-up': True, 'font-size':fontSize, 'font': defaultFont},
+         'orientation': {'text-align': 'left', 'position': (2, 8), 'multiple-lines': True, 'ecart': 5, 'lines-up': False, 'font-size':8, 'font': defaultFont},
+         'echelle': {'text-align': 'right', 'position': (93, 8), 'multiple-lines': False, 'ecart': 0, 'lines-up': False, 'font-size':8, 'font': defaultFont},
+
+         }
+
 
 symbols = {
     'FE': {'offset': (imgWidth-4.5, -4), 'lines': [{'p': (0, 0, 9, imgHeigth+8), 'd': (30, 6)}]},
@@ -72,20 +88,6 @@ for j in range(1, samples+1):
     #  symbols['FO']['lines'].append({'p': (o+9, (imgHeigth+8)-k, 9, (imgHeigth+8)-k), 'd': (1, 0), 'w':.3})
     symbols['FO']['lines'].append({'p': (o+9, (imgHeigth+8)-k, -2, (imgHeigth + 8)-k+o2), 'd': (1, 0), 'w': .3})
 
-
-metas_alias = {'action': 'action', 'a': 'action',
-               'dialogue': 'dialogue',
-               'd': 'orientation',
-               'orientation': 'orientation', 'o': 'orientation',
-               'echelle': 'echelle', 'e': 'echelle',
-               }
-
-metas = {'action': {'text-align': 'center', 'position': (47.5, 8), 'multiple-lines': True, 'ecart': 5, 'lines-up': False, 'font-size':fontSize, 'font': defaultFont},
-         'dialogue': {'text-align': 'center', 'position': (47.5, -56), 'multiple-lines': True, 'ecart': 5, 'lines-up': True, 'font-size':fontSize, 'font': defaultFont},
-         'orientation': {'text-align': 'left', 'position': (2, 8), 'multiple-lines': True, 'ecart': 5, 'lines-up': False, 'font-size':8, 'font': defaultFont},
-         'echelle': {'text-align': 'right', 'position': (93, 8), 'multiple-lines': False, 'ecart': 0, 'lines-up': False, 'font-size':8, 'font': defaultFont},
-
-         }
 
 scriptPath = "/u/storymatic/"
 gridPath = scriptPath + "grille.jpg"
