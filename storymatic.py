@@ -283,7 +283,7 @@ for k, t in enumerate(thumbnails):
         
         if not t['fullpage']:
             c.setFont(texts['shot-name']['font'], texts['shot-name']['font-size'])
-            c.drawString((positions[position]+2)*mm, height-(lines[line]-62)*mm, "%s" % texte)
+            c.drawString((positions[position]+2)*mm, height-(lines[line]-62)*mm, "%s" % texte.lower())
             c.setFont(defaultFont, fontSize)
     for meta in metas:
         if t[meta]:
