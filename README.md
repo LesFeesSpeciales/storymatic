@@ -175,3 +175,12 @@ Et y copier (pour python3) :
     done
 
 en mettant a jour le chemin vers storymatic.py bien entendu (et la bonne version de python le cas échéant)
+
+# Script d'update si pas de git
+
+Pour Ghis
+
+    cd $TMPDIR
+    curl -LOk https://github.com/LesFeesSpeciales/storymatic/archive/master.zip
+    unzip master.zip
+    mv ./storymatic-master/* /u/storymatic/
