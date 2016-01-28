@@ -64,31 +64,49 @@ angle = 60
 samples = 50
 maxPos = 11
 # Traits FF
-for j in range(1, samples+1):
+for j in range(1, samples+10):
     k = (imgHeigth+8)/samples*j
     
     if k <= (imgHeigth+8)/2:
         o = math.tan((9)/((imgHeigth+8)/2)) * k
     else:
         o = math.tan((9)/((imgHeigth+8)/2)) * ((imgHeigth+8)-k)
-    print(k, o)
+
     o2 = math.tan(angle)*(maxPos-o)
     #  symbols['FF']['lines'].append({'p': (0, (imgHeigth+8)-k, o, (imgHeigth+8)-k), 'd': (2, 1)})
-    symbols['FF']['lines'].append({'p': (o, (imgHeigth+8)-k, maxPos, (imgHeigth + 8)-k+o2), 'd': (1, 0), 'w': .3})
+    if (imgHeigth + 8)-k+o2 < (imgHeigth + 8) and (imgHeigth+8)-k >= 0:
+        symbols['FF']['lines'].append({'p': (o, (imgHeigth+8)-k, maxPos, (imgHeigth + 8)-k+o2), 'd': (1, 0), 'w': .3})
+    elif (imgHeigth+8)-k < 0:
+        if (imgHeigth + 8)-k+o2 > 0:
+            o = math.tan(90-angle)*((imgHeigth + 8)-k+o2)
+            symbols['FF']['lines'].append({'p': (o/2+11, 0, 11, (imgHeigth + 8)-k+o2), 'd': (1, 0), 'w': .3})
+    else:
+        # la ligne depasse en haut
+        o2 = math.atan(angle) * k * 2
+        symbols['FF']['lines'].append({'p': (o, (imgHeigth+8)-k, o2, imgHeigth+8), 'd': (1, 0), 'w': .3})
 
 # Traits FO
-for j in range(1, samples+1):
+for j in range(1, samples+10):
     k = (imgHeigth+8)/samples*j
     if k <= (imgHeigth+8)/2:
         o = math.tan((-9)/((imgHeigth+8)/2)) * k
     else:
         o = math.tan((-9)/((imgHeigth+8)/2)) * ((imgHeigth+8)-k)
-    print(k, o)
     o2 = math.tan(angle)*(maxPos+o)
     #  symbols['FO']['lines'].append({'p': (o+9, (imgHeigth+8)-k, 9, (imgHeigth+8)-k), 'd': (1, 0), 'w':.3})
-    symbols['FO']['lines'].append({'p': (o+9, (imgHeigth+8)-k, -2, (imgHeigth + 8)-k+o2), 'd': (1, 0), 'w': .3})
+    if (imgHeigth + 8)-k+o2 < (imgHeigth + 8) and (imgHeigth+8)-k >= 0:
+        symbols['FO']['lines'].append({'p': (o+9, (imgHeigth+8)-k, -2, (imgHeigth + 8)-k+o2), 'd': (1, 0), 'w': .3})
+    elif (imgHeigth+8)-k < 0:
+        if (imgHeigth + 8)-k+o2 > 0:
+            o = math.tan(90-angle)*((imgHeigth + 8)-k+o2)
+            symbols['FO']['lines'].append({'p': (-o/2-2, 0, -2, (imgHeigth + 8)-k+o2), 'd': (1, 0), 'w': .3})
+    else:
+        # la ligne depasse en haut
+        o2 = math.atan(angle) * k * 2
+        symbols['FO']['lines'].append({'p': (o+9, (imgHeigth+8)-k, 9-o2, imgHeigth+8), 'd': (1, 0), 'w': .3})
 
-
+# (-0.37069484505115247, 1.2272, 1.9072298124209492)
+# (-0.7413896901023049, 2.4544, 3.8144596248418985)
 scriptPath = "/u/storymatic/"
 gridPath = scriptPath + "grille.jpg"
 
