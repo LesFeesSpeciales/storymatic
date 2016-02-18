@@ -126,7 +126,7 @@ title = None
 
 
 def newThumbnail():
-    d = {'name': '-', 'cut': False, 'fullpage': False, 'FO': False, "FF": False, "FE": False}
+    d = {'name': '-', 'cut': False, 'fullpage': False, 'FO': False, "FF": False, "FE": False, 'customBackground': None}
     for m in metas:
         d[m] = [] if metas[m]['multiple-lines'] else None
     return d
@@ -154,7 +154,7 @@ for l in f.readlines():
             for i in range(0, r):
                 thumbnails.append(newThumbnail())
 
-        elif l.lower().startswith("page:") or l.lower().startswith("fond:"):
+        elif l.lower().startswith("page:"):
             # pleine page speciale
             # Boucler la page precedente s'il y a
             t = len(thumbnails)
@@ -170,6 +170,9 @@ for l in f.readlines():
             # indiquer sur la derniere case le caractere special
             thumbnails[-1]['name'] = l.split(":")[1]
             thumbnails[-1]['fullpage'] = True
+        elif l.lower().startswith("fond:"):
+            thumbnails[-1]['customBackground'] = ":".join(l.split(":")[1:])
+            print("CUSTOMBACKGROUND")
         elif has_meta:
             v = ":".join(l.split(":")[1:])
             if metas[meta]['multiple-lines']:
@@ -197,7 +200,9 @@ grid = Image.open(gridPath)
 c = canvas.Canvas(outputPdf, pagesize=(width, height))
 
 shapesQueue = []
-def newPage(c, pageNumber, pages, justtext=False):
+
+
+def newPage(c, pageNumber, pages, customBackground=None, justtext=False):
     global shapesQueue
     if shapesQueue:
         drawShapes(shapesQueue)
@@ -205,8 +210,10 @@ def newPage(c, pageNumber, pages, justtext=False):
     if not justtext:
         if pageNumber>1:
             c.showPage()
-        c.drawInlineImage(grid, 0, 0, width=width, height=height)
-
+        if not customBackground or not os.path.exists(customBackground):
+            c.drawInlineImage(grid, 0, 0, width=width, height=height)
+        else:
+            c.drawImage(customBackground, 0, 0, width=width, height=height)
 
     c.setFont(texts['titre']['font'], texts['titre']['font-size'])
     c.drawCentredString(texts['titre']['position'][0], texts['titre']['position'][1], title)
@@ -219,17 +226,6 @@ def newPage(c, pageNumber, pages, justtext=False):
 
     c.setFont(texts['date']['font'], texts['date']['font-size'])
     c.drawRightString(texts['date']['position'][0], texts['date']['position'][1], "%02i/%02i/%i  %02i:%02i" % (today.day, today.month, today.year, today.hour, today.minute))
-
-
-pages = int(len(thumbnails)/12)+1
-page = 1
-line = 0
-position = 0
-today = datetime.now()
-c.setStrokeColorRGB(0, 0, 0)
-c.setFillColorRGB(0, 0, 0)
-
-newPage(c, 1, pages)
 
 
 
@@ -245,11 +241,11 @@ def drawShapes(shapesQueue):
     c.setLineWidth(1)
 
 def drawShape(initialPosition=(0, 0), offset=(0, 0), lines=[]):
-    print("Drawshape : %s" % str(lines))
+    # print("Drawshape : %s" % str(lines))
     i = initialPosition
     o = offset
-    print(i)
-    print(o)
+    # print(i)
+    # print(o)
 
     for l in lines:
         p = l['p'] # Positions
@@ -264,16 +260,39 @@ def drawShape(initialPosition=(0, 0), offset=(0, 0), lines=[]):
         c.line((i[0]+o[0]+p[0])*mm, (i[1]+o[1]+p[1])*mm, (i[0]+o[0]+p[2])*mm, (i[1]+o[1]+p[3])*mm)
 
     c.setDash(1, 0)
+
+
+pages = int(len(thumbnails)/12)+1
+page = 0
+line = 0
+position = 0
+today = datetime.now()
+c.setStrokeColorRGB(0, 0, 0)
+c.setFillColorRGB(0, 0, 0)
+
+#newPage(c, 1, pages)
+
 for k, t in enumerate(thumbnails):
     name = t['name']
     cut = t['cut']
     # Calcul des positions/lignes et pages
-    if line == 2 and position == 4:
+    if (line == 2 and position == 4) or page == 0:
         # Fin de la 4e position de la 3e ligne : nouvelle page
         page += 1
         position = 0
         line = 0
-        newPage(c, page, pages)
+        customBackground = None
+        startIndex = (page - 1) * 12
+        endIndex = page * 12
+        if endIndex > len(thumbnails):
+            endIndex = -1
+        for t in thumbnails[startIndex:endIndex]:
+            if t['customBackground']:
+                customBackground = folder + t['customBackground'] + '.jpg'
+                print(customBackground)
+
+        newPage(c, page, pages, customBackground=customBackground)
+
     elif position == 4:
         line += 1
         position = 0
@@ -284,8 +303,7 @@ for k, t in enumerate(thumbnails):
     else:
         # Image
         img = name.split(':')[0].replace('/', '')
-
-        if not ":" in name and "-" in name:
+        if ":" not in name and "-" in name:
             texte = name.split("-")[1].replace('/', '')
         else:
             texte = name.split(':')[-1]
