@@ -261,8 +261,11 @@ def drawShape(initialPosition=(0, 0), offset=(0, 0), lines=[]):
 
     c.setDash(1, 0)
 
+pages = int(len(thumbnails)/12)
+if len(thumbnails) % 12:
+    # si ce n'est pas un set de pages completes, ajouter 1
+    pages += 1
 
-pages = int(len(thumbnails)/12)+1
 page = 0
 line = 0
 position = 0
