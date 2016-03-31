@@ -289,13 +289,11 @@ for k, t in enumerate(thumbnails):
         endIndex = page * 12
         if endIndex > len(thumbnails):
             endIndex = -1
-        for t in thumbnails[startIndex:endIndex]:
-            if t['customBackground']:
-                customBackground = folder + t['customBackground'] + '.jpg'
+        for _t in thumbnails[startIndex:endIndex]:
+            if _t['customBackground']:
+                customBackground = folder + _t['customBackground'] + '.jpg'
                 print(customBackground)
-
         newPage(c, page, pages, customBackground=customBackground)
-
     elif position == 4:
         line += 1
         position = 0
@@ -367,6 +365,7 @@ for k, t in enumerate(thumbnails):
     if k == len(thumbnails)-1:
         # Derniere case, il faut dessiner les shaopes
         drawShapes(shapesQueue)
+    
 
 # Sauvegarde du fichier
 c.save()
